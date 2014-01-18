@@ -94,16 +94,187 @@ So add a preferences.xml file to your project and, if necessary the surrounding 
 
 ![Structure](images/structure.png)
 
+Contents of preferences.xml is pretty straightforward: different components, most important thing: each component has a key which can be used to access the property via Preferences-API within our fragment for example.
 
-
-```java
+**preferences.xml**
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="pref_sync"
+        android:title="Toggle me!"
+        android:summary="Setting 1 is a demo setting for blablabla..."
+        android:defaultValue="true" />
+    <SwitchPreference
+        android:key="display_sub"
+        android:title="Display submarine"
+        android:summary="Decide whether to display the submarine image in the main view or not..."
+        android:defaultValue="false"/>
+</PreferenceScreen>
 ```
 
+You notice property **display_sub**? That's the property we somehow need to reference in order to decide about submarine visibility in our main fragment view.
+
+Finally we need to create a corresponding Java class to the preferences.xml in order to have an accessor enabling us to trigger the settings view...within the adapter the xml is passed in, that's all we have to do here.
+
+
+**SettingsFragment.java**
 ```java
+public class SettingsFragment extends PreferenceFragment
+{
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
+    }
+}
+
 ```
 
-```java
-```
+## Trigger & display Settings screen
+Ok so let's wake up the settings dialog! Within our MainActivity.java class Android Studio generates by default a hook to get notified in case of device settings menu is pressed - that's exactly the right place to put the call firing up the settings dialog:
 
 ```java
+@Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    int id = item.getItemId();
+    if (id == R.id.action_settings) {
+        getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).addToBackStack(null).commit();
+        inSettings = true;
+    }
+    return super.onOptionsItemSelected(item);
+}
 ```
+
+The SettingsFragment is initialized and the main view is replaced with the settings dialog. The main view is placed to the backstack, and finally the FragmentTransaction is commited.
+
+And there is this inSettings property - well thats part of the hack required for proper back navigation. The property is used in another method catching the hardware back press, add this method to the MainActivity.java as well:
+
+```java
+@Override
+public void onBackPressed()
+{
+    if (inSettings)
+    {
+        backFromSettingsFragment();
+        return;
+    }
+    super.onBackPressed();
+}
+
+private void backFromSettingsFragment()
+{
+    inSettings = false;
+    getFragmentManager().popBackStack();
+}
+```
+
+So your whole MainActivity.java should by now look similar to the class listed below:
+
+**MainActivity.java**
+```java
+public class MainActivity extends ActionBarActivity
+{
+    // ------------------------------------------------------------------------
+    // members
+    // ------------------------------------------------------------------------
+
+    private boolean inSettings = false;
+
+    // ------------------------------------------------------------------------
+    // public usage
+    // ------------------------------------------------------------------------
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, new MainFragment())
+                    .commit();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).addToBackStack(null).commit();
+            inSettings = true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if (inSettings)
+        {
+            backFromSettingsFragment();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    private void backFromSettingsFragment()
+    {
+        inSettings = false;
+        getFragmentManager().popBackStack();
+    }
+}
+
+```
+
+## Finally: access property
+The nice thing about Android default preferences: yo do not need to care about writing/storing/reading these, as soon as the user toggles a switch the corresponding property will be written automatically...so all you need to do is accessing these properties, for example in your MainFragment.java view initilalization procedure:
+
+(part of the **MainFragment.java** class)
+```java
+ @Override
+public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                         Bundle savedInstanceState)
+{
+    // Inflate the layout for this fragment
+    View view =  inflater.inflate(R.layout.fragment_main, container, false);
+
+    ImageView ivSubmarine = (ImageView)view.findViewById(R.id.iv_submarine);
+
+    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    boolean displaySub = sharedPref.getBoolean("display_sub", true);
+
+    if (displaySub)
+    {
+        ivSubmarine.setVisibility(View.VISIBLE);
+    }
+    else
+    {
+        ivSubmarine.setVisibility(View.GONE);
+    }
+
+    return view;
+}
+```
+
+## Conclusion
+
+Ok...you're done - the whole application should work by now including back navigation etc. - stay tuned and dont hesitate to contact us in case of any questions!
+
+[![Image](images/twitter.png "Image title") ](https://twitter.com/_flomueller "Twitter")
