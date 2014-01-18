@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="pref_sync"
+        android:title="Toggle me!"
+        android:summary="Setting 1 is a demo setting for blablabla..."
+        android:defaultValue="true" />
+    <SwitchPreference
+        android:key="switch_pref"
+        android:title="Switch me!"
+        android:summary="Switch Setting...a simple demo switch..."
+        android:defaultValue="false"/>
+</PreferenceScreen>
