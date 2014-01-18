@@ -13,7 +13,7 @@ If you know how to do so it's easy...if you dont you will keep struggeling for h
 
 Applying these two little hacks/knowledge will result in a proper working settings application - have fun!
 
-![ScreenShot](images/phone01.png)
+![ScreenShot](images/phones.png)
 
 # What do we do here?
 
