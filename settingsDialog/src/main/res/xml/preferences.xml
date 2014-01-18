@@ -6,8 +6,8 @@
         android:summary="Setting 1 is a demo setting for blablabla..."
         android:defaultValue="true" />
     <SwitchPreference
-        android:key="switch_pref"
-        android:title="Switch me!"
-        android:summary="Switch Setting...a simple demo switch..."
+        android:key="display_sub"
+        android:title="Display submarine"
+        android:summary="Decide whether to display the submarine image in the main view or not..."
         android:defaultValue="false"/>
 </PreferenceScreen>
