@@ -139,9 +139,11 @@ Ok so let's wake up the settings dialog! Within our MainActivity.java class Andr
 
 ```java
 @Override
-public boolean onOptionsItemSelected(MenuItem item) {
+public boolean onOptionsItemSelected(MenuItem item) 
+{
     int id = item.getItemId();
-    if (id == R.id.action_settings) {
+    if (id == R.id.action_settings) 
+    {
         getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).addToBackStack(null).commit();
         inSettings = true;
     }
